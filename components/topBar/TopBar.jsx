@@ -1,8 +1,9 @@
-import React from "react";
-import { AppBar, Toolbar, Typography } from "@material-ui/core";
-import "./TopBar.css";
-// import fetchModel from "../../lib/fetchModelData";
-import Axios from "axios";
+import React from 'react';
+import {Link} from 'react-router-dom'
+import {
+  AppBar, Toolbar, Typography
+} from '@material-ui/core';
+import './TopBar.css';
 
 /**
  * Define TopBar, a React componment of CS142 project #5
@@ -11,37 +12,16 @@ class TopBar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      url: this.props.match.url,
-      name: "",
-      // userModel: {},
-    };
-  }
-  componentDidUpdate() {
-    const currUrl = this.props.match.url;
-    if (this.state.url !== currUrl) {
-      this.state.url = currUrl;
-      // this.setState({ url: currUrl });
-      if (currUrl === this.state.url) {
-        this.nameHandle();
-      }
+      name: props.name,
+      where:props.where
     }
   }
-  componentDidMount() {
-    this.nameHandle();
-  }
-  nameHandle() {
-    let arr = this.state.url.split("/");
-    // console.log(arr);
-    let userModel1 = {};
-    let userModel = window.cs142models.userModel(arr[2]);
-
-    if (arr[1] !== "") {
-      Axios.get("/user/" + arr[2]).then((res) => (userModel1 = res.data));
-      if (arr[1] === "users") {
-        this.setState({ name: userModel.first_name });
-      } else if (arr[1] === "photos") {
-        this.setState({ name: "Photos of " + userModel.first_name });
-      }
+  componentDidUpdate(prevprops) {
+    if (prevprops.where !== this.props.where || prevprops.name !== this.props.name) {
+      this.setState({
+        name: this.props.name,
+        where:this.props.where
+      })
     }
   }
   render() {
@@ -49,10 +29,12 @@ class TopBar extends React.Component {
       <AppBar className="cs142-topbar-appBar" position="absolute">
         <Toolbar>
           <Typography variant="h5" color="inherit">
-            Tsetsenbileg
+            <Link to="/">
+              Khebe&apos;s Photo Sharing Web &nbsp; &lt;(￣︶￣)&gt;
+            </Link>
           </Typography>
-          <Typography variant="h5" position="inherit">
-            {this.state.name}
+          <Typography variant="h5">
+            {this.state.where=="/"?"Home":this.state.where=="/users"?"Users":this.state.where=="/users/:userId"?this.state.name:this.state.where=="/photos/:userId"?`Photos of ${this.state.name}`:""}
           </Typography>
         </Toolbar>
       </AppBar>

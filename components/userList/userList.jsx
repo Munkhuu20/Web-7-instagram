@@ -1,16 +1,16 @@
-import React from "react";
+import React from 'react';
+import {Link} from 'react-router-dom'
+import Axios from "axios"
 import {
   Divider,
   List,
   ListItem,
   ListItemText,
   Typography,
-  Avatar,
-} from "@material-ui/core";
-import "./userList.css";
-import { Link } from "react-router-dom";
-import fetchModel from "../../lib/fetchModelData";
-import axios from "axios";
+}
+from '@material-ui/core';
+import './userList.css';
+
 /**
  * Define UserList, a React componment of CS142 project #5
  */
@@ -18,43 +18,39 @@ class UserList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      userListModel: [],
-    };
+      List:[]
+    }
   }
   componentDidMount() {
-    axios
-      .get("/user/list")
-      .then((res) => this.setState({ userListModel: res.data }));
+    Axios.get('/user/list').then(res => this.setState({
+      List: res.data
+    }));
   }
   render() {
     return (
-      // <div>
-      <List component="nav" className="userList">
-        <Typography variant="h6" align="center">
-          Users of Photo App
+      <div>
+        <Typography variant="body1">
+          Friend List (Fake Cool Friends)
         </Typography>
-        {this.state.userListModel.map((el) => {
-          return (
-            <React.Fragment key={el._id}>
-              <Link to={"/users/" + el._id}>
+        <List component="nav">{
+          this.state.List.map((el, ind) => {
+            return (
+              <Link key={ind} to={`/users/${el._id}`}>
                 <ListItem>
-                  <Avatar color="purple">
-                    {el.first_name.charAt(0)}
-                    {el.last_name.charAt(0)}
-                  </Avatar>
-                  <ListItemText>
-                    {el.first_name + "  "}
-                    {el.last_name}
-                  </ListItemText>
+                  <ListItemText primary={`${el.first_name} ${el.last_name}`} />
                 </ListItem>
+                <Divider/>
               </Link>
-
-              <Divider />
-            </React.Fragment>
-          );
-        })}
-      </List>
-      // </div>
+            )
+          })
+        }
+        </List>
+        <Typography variant="body1">
+          <Link to="/users">
+            See All Users
+          </Link>
+        </Typography>
+      </div>
     );
   }
 }

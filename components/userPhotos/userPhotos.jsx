@@ -1,71 +1,61 @@
-import React from "react";
-import { Typography, Divider } from "@material-ui/core";
-import "./userPhotos.css";
-import { Link } from "react-router-dom";
-import fetchModel from "../../lib/fetchModelData";
-import axios from "axios";
+import React from 'react';
+import { Link } from  'react-router-dom'
+import Axios from "axios"
+import {
+  Typography
+} from '@material-ui/core';
+import './userPhotos.css';
+import Image_card from "../img_card/Image_card"
+
 /**
  * Define UserPhotos, a React componment of CS142 project #5
  */
-const Card = (props) => {
-  const [flag, setFlag] = React.useState(false);
-  return (
-    <div>
-      <div className="userPhotos">
-        <div className="date">{props.data.date_time}</div>
-        <img
-          src={"./../../images/" + props.data.file_name}
-          alt="Photos of user"
-        />
-        <div>
-          <div onClick={() => setFlag(!flag)}>Comments</div>
-          {!props.data.comments ? (
-            <div style={{ display: flag ? "block" : "none" }}>No comment</div>
-          ) : (
-            props.data.comments.map((el, ind) => {
-              return (
-                <div
-                  className="commCont"
-                  key={ind}
-                  style={{ display: flag ? "block" : "none" }}
-                >
-                  <div className="title">
-                    <span>
-                      <Link to={"/users/" + el.user._id}>
-                        {el.user.first_name} {el.user.last_name}
-                      </Link>
-                    </span>
-                    <span>{el.date_time}</span>
-                  </div>
-                  <div className="comm">{el.comment}</div>
-                  <Divider />
-                </div>
-              );
-            })
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
 class UserPhotos extends React.Component {
   constructor(props) {
     super(props);
-    axios
-      .get("/PhotosOfUser/" + this.props.match.params.userId)
-      .then((res) => this.setState({ photos: res.data }));
-    this.state = {
-      photos: [],
-    };
+    this.state = undefined
+    
+  }
+  componentDidMount () {
+    Axios.get(`/user/${this.props.match.params.userId}`).then(res => {
+      this.setState({ ...res.data })
+      this.props.setData(this.props.match.path, res.data.first_name)
+    });
+    Axios.get(`/photosOfUser/${this.props.match.params.userId}`).then(res => {
+      this.setState({ photos:res.data })
+    });
   }
 
+  componentDidUpdate(prevprop) {
+    if (prevprop.match.params.userId !== this.props.match.params.userId) {
+     Axios.get(`/user/${this.props.match.params.userId}`).then(res => {
+      this.setState({ ...res.data })
+      this.props.setData(this.props.match.path,res.data.first_name)
+    });
+    Axios.get(`/photosOfUser/${this.props.match.params.userId}`).then(res => {
+      this.setState({ photos:res.data })
+    });
+    }
+  }
   render() {
     return (
-      <div className="upcont">
-        {this.state.photos.map((el) => {
-          return <Card key={el._id} data={el} />;
-        })}
+      <div className="userPhoto">
+        {this.state ? (
+        <React.Fragment>
+          <div className="MYBUTTON">
+        <Link to={`/users/${this.state._id}`} >
+            <Typography variant="button" style={{fontSize:18}}>See details of {this.state.first_name}</Typography>
+        </Link>
+        </div>
+        {this.state.photos?
+          this.state.photos.map((el, ind) => <Image_card key={ind} data={el} name={this.state.first_name + " "+ this.state.last_name} />):""
+            }
+        </React.Fragment>
+        ):""
+      }
+        
       </div>
+
     );
   }
 }

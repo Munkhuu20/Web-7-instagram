@@ -1,56 +1,71 @@
-import React from "react";
-import { Typography, Button } from "@material-ui/core";
-import "./userDetail.css";
-import { Link } from "react-router-dom";
-import fetchModel from "../../lib/fetchModelData";
-import axios from "axios";
+import React from 'react';
+import {Link} from 'react-router-dom'
+import Axios from "axios"
+import {
+  Typography
+} from '@material-ui/core';
+import './userDetail.css';
+
+
 /**
  * Define UserDetail, a React componment of CS142 project #5
  */
-
 class UserDetail extends React.Component {
   constructor(props) {
     super(props);
-
-    this.state = {
-      userId: this.props.match.params.userId,
-      userDetail: [],
-    };
-    axios
-      .get("/user/" + this.props.match.params.userId)
-      .then((res) => this.setState({ userDetail: res.data }));
+    this.state = undefined
   }
-  componentDidUpdate(prevProps) {
-    let prevId = prevProps.match.params.userId;
-    let currId = this.props.match.params.userId;
-    if (prevId !== currId) {
-      this.state.userId = currId;
+   componentDidMount () {
+    Axios.get(`/user/${this.props.match.params.userId}`).then(res => {
+      this.setState({ ...res.data })
+      this.props.setData(this.props.match.path, res.data.first_name)
+    });
+    Axios.get(`/photosOfUser/${this.props.match.params.userId}`).then(res => {
+      this.setState({ photos:res.data })
+    });
+  }
 
-      axios
-        .get("/user/" + this.state.userId)
-        .then((res) => this.setState({ userDetail: res.data }));
+  componentDidUpdate(prevprop) {
+    if (prevprop.match.params.userId !== this.props.match.params.userId) {
+     Axios.get(`/user/${this.props.match.params.userId}`).then(res => {
+      this.setState({ ...res.data })
+      this.props.setData(this.props.match.path,res.data.first_name)
+    });
+    Axios.get(`/photosOfUser/${this.props.match.params.userId}`).then(res => {
+      this.setState({ photos:res.data })
+    });
     }
   }
   render() {
     return (
-      <div className="card">
-        <Typography variant="h5">
-          {this.state.userDetail.first_name} {this.state.userDetail.last_name}
-        </Typography>
-        <Typography variant="subtitle2" className="item">
-          Desctiption: {this.state.userDetail.description}
-        </Typography>
-        <div className="occu item">
-          Occupation: {this.state.userDetail.occupation}
+      <div className="userDetail">
+        {
+          this.state ? (
+            <React.Fragment>
+              <div>
+                {
+                  this.state.photos?<img src={`images/${this.state.photos[0].file_name}`} alt=""/>:""
+                }
+        
         </div>
-        <div className="loc item">
-          Location: {this.state.userDetail.location}
-        </div>
-        <Link to={"/photos/" + this.state.userId}>
-          <Button variant="outlined" color="primary">
-            View Pictures
-          </Button>
-        </Link>
+        <div>
+        <Typography variant="h2">{`${this.state.first_name} ${this.state.last_name}`}</Typography>
+        <Typography variant="h6">
+          <b>Bio</b>:{this.state.description}
+        </Typography>
+        <Typography variant="h6">
+          <b>Current city</b>:{this.state.location}
+        </Typography>
+        <Typography variant="h6">
+         <b>Occupation</b>:{this.state.occupation}
+          </Typography>
+          <Link to={`/photos/${this.state._id}`}>
+            <Typography variant="button">See Photos of {this.state.first_name}</Typography>
+          </Link>
+              </div>
+              </React.Fragment>
+          ):""
+        }
       </div>
     );
   }
